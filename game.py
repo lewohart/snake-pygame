@@ -1,5 +1,6 @@
 import logging
 import pygame
+import random
 import time
 
 logger = logging.getLogger(__name__)
@@ -22,30 +23,68 @@ class Color(object):
     white = (255, 255, 255)
 
 
+class Food(object):
+    size = 10
+
+    def __init__(self, screen):
+        self.screen = screen
+        self.new()
+
+    def new(self):
+        self.x = (round(
+            random.randrange(0,
+                             self.screen.get_size()[0] - Food.size) / 10.0) *
+                  10.0)
+        self.y = (round(
+            random.randrange(0,
+                             self.screen.get_size()[1] - Food.size) / 10.0) *
+                  10.0)
+
+    def draw(self):
+        pygame.draw.rect(self.screen, Color.green,
+                         [self.x, self.y, Food.size, Food.size])
+
+
 class Snake(object):
     head_size = 10
 
     def __init__(self, screen):
+        self.grow = False
         self.collided = False
         self.screen_size = screen.get_size()
         self.size = Snake.head_size
-
         self.screen = screen
         self.body = [(self.screen_size[0] / 2, self.screen_size[1] / 2)]
 
+    def head_x(self) -> (int, int):
+        return self.body[-1][0]
+
+    def head_y(self) -> (int, int):
+        return self.body[-1][1]
+
     def move_x(self, dx):
-        x = self.body[-1][0] + dx
+        x = self.head_x() + dx
         self.collided = not (0 <= x and x <= self.screen_size[0] - self.size)
 
         if not self.collided:
-            self.body.append((x, self.body[-1][1]))
+            self.body.append((x, self.head_y()))
+
+            if not self.grow:
+                del self.body[0]
+            else:
+                self.grow = False
 
     def move_y(self, dy):
-        y = self.body[-1][1] + dy
+        y = self.head_y() + dy
         self.collided = not (0 <= y and y <= self.screen_size[1] - self.size)
 
         if not self.collided:
-            self.body.append((self.body[-1][0], y))
+            self.body.append((self.head_x(), y))
+
+            if not self.grow:
+                del self.body[0]
+            else:
+                self.grow = False
 
     def move(self, key):
         if key == pygame.K_LEFT:
@@ -59,21 +98,17 @@ class Snake(object):
 
         self.draw()
 
+    def chomp(self, food: Food):
+        if self.head_x() == food.x and self.head_y() == food.y:
+            self.grow = True
+            food.new()
+
+        food.draw()
+
     def draw(self):
         for b in self.body:
             pygame.draw.rect(self.screen, Color.black,
                              [b[0], b[1], self.size, self.size])
-
-
-class Food(object):
-    size = 10
-
-    def __init__(self, screen):
-        self.screen = screen
-
-    def draw(self):
-        pygame.draw.rect(self.screen, Color.green,
-                         [400, 300, Food.size, Food.size])
 
 
 if __name__ == "__main__":
@@ -102,10 +137,10 @@ if __name__ == "__main__":
         screen.fill(Color.white)
 
         snake.move(last_key)
-        food.draw()
+        snake.chomp(food)
 
         pygame.display.update()
-        clock.tick(30)
+        clock.tick(20)
 
     logger.debug("Finish event loop")
     font_style = pygame.font.SysFont(None, 50)
