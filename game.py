@@ -7,8 +7,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
@@ -31,18 +30,19 @@ class Food(object):
         self.new()
 
     def new(self):
-        self.x = (round(
-            random.randrange(0,
-                             self.screen.get_size()[0] - Food.size) / 10.0) *
-                  10.0)
-        self.y = (round(
-            random.randrange(0,
-                             self.screen.get_size()[1] - Food.size) / 10.0) *
-                  10.0)
+        self.x = (
+            round(random.randrange(0, self.screen.get_size()[0] - Food.size) / 10.0)
+            * 10.0
+        )
+        self.y = (
+            round(random.randrange(0, self.screen.get_size()[1] - Food.size) / 10.0)
+            * 10.0
+        )
 
     def draw(self):
-        pygame.draw.rect(self.screen, Color.green,
-                         [self.x, self.y, Food.size, Food.size])
+        pygame.draw.rect(
+            self.screen, Color.green, [self.x, self.y, Food.size, Food.size]
+        )
 
 
 class Snake(object):
@@ -107,8 +107,9 @@ class Snake(object):
 
     def draw(self):
         for b in self.body:
-            pygame.draw.rect(self.screen, Color.black,
-                             [b[0], b[1], self.size, self.size])
+            pygame.draw.rect(
+                self.screen, Color.black, [b[0], b[1], self.size, self.size]
+            )
 
 
 if __name__ == "__main__":
