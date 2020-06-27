@@ -1,10 +1,12 @@
+# -*- coding: UTF-8 -*-
+
 import time
 import logging
 import traceback
 import json
 
 
-class __Formatter(object):
+class Formatter(object):
     def format(self, record):
         d = {
             "level": record.levelname,
@@ -24,9 +26,10 @@ class __Formatter(object):
             d.update(record.context)
         return json.dumps(d)
 
-def setup_logging(cfg):
+
+def setup_logging(verbose: bool):
     handler = logging.StreamHandler()
-    handler.setFormatter(__Formatter())
+    handler.setFormatter(Formatter())
     root_logger = logging.getLogger()
     root_logger.addHandler(handler)
-    root_logger.setLevel(logging.DEBUG if cfg.verbose else logging.INFO)
+    root_logger.setLevel(logging.DEBUG if verbose else logging.INFO)

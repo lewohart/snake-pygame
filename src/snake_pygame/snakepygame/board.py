@@ -1,9 +1,17 @@
 import pygame
 
+from color import Color
+
 
 class Board(object):
     def __init__(
-        self, screen, display: pygame.Rect, box: pygame.Rect, rows: int, columns: int
+        self,
+        screen,
+        display: pygame.Rect,
+        box: pygame.Rect,
+        rows: int,
+        columns: int,
+        draw_grid: bool = False,
     ):
         self.screen = screen
         self.display = display
@@ -11,40 +19,53 @@ class Board(object):
         self.rows = int(rows)
         self.columns = int(columns)
 
-        self.cel_width = box.width / (rows + 1)
-        self.cel_height = box.height / (columns + 1)
+        self.cel_height = box.height / (rows + 1)
+        self.cel_width = box.width / (columns + 1)
+        self.on_draw_grid = self.on_draw_grid_active if draw_grid else lambda: None
 
-    def get_rect_at(self, row: int, col: int) -> pygame.Rect:
+    def get_rect_at(self, x: int, y: int) -> pygame.Rect:
         return pygame.Rect(
-            (box.left + ((row + 1) * self.cel_width)) - (self.cel_width / 2),
-            (box.top + ((col + 1) * self.cel_height)) - (self.cel_height / 2),
+            (self.box.left + ((x + 1) * self.cel_width)) - (self.cel_width / 2),
+            (self.box.top + ((y + 1) * self.cel_height)) - (self.cel_height / 2),
             self.cel_width,
             self.cel_height,
         )
 
-    def get_point_at(self, row: int, col: int) -> (int, int):
+    def get_point_at(self, x: int, y: int) -> (int, int):
         return (
-            box.left + ((row + 1) * self.cel_width),
-            box.top + ((col + 1) * self.cel_height),
+            self.box.left + ((x + 1) * self.cel_width),
+            self.box.top + ((y + 1) * self.cel_height),
         )
 
+    def on_draw_grid_active(self):
+        max_y = self.rows
+        max_x = self.columns
+
+        for x in range(max_x):
+            pygame.draw.line(
+                self.screen,
+                Color.white_smoke,
+                self.get_point_at(x, 0),
+                self.get_point_at(x, max_y - 1),
+                1,
+            )
+
+        for y in range(max_y):
+            pygame.draw.line(
+                self.screen,
+                Color.white_smoke,
+                self.get_point_at(0, y),
+                self.get_point_at(max_x - 1, y),
+                1,
+            )
+
     def draw(self):
-        pygame.draw.rect(self.screen, Color.black, box, 1)
+        self.screen.fill(Color.white)
+        pygame.draw.rect(self.screen, Color.black, self.box, 1)
+        self.on_draw_grid()
 
-        for i in range(self.rows):
-            pygame.draw.line(
-                self.screen,
-                Color.white_smoke,
-                self.get_point_at(i, 0),
-                self.get_point_at(i, self.columns - 1),
-                1,
-            )
+    def contains_x(self, x: int):
+        return 0 <= x and x < self.columns
 
-        for i in range(self.columns):
-            pygame.draw.line(
-                self.screen,
-                Color.white_smoke,
-                self.get_point_at(0, i),
-                self.get_point_at(self.rows - 1, i),
-                1,
-            )
+    def contains_y(self, y: int):
+        return 0 <= y and y < self.rows

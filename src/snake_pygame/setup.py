@@ -46,7 +46,7 @@ setup(name="snake-pygame",
       cmdclass={'test': PyTest},
       
       # TODO: List of packages that this one depends upon:   
-      install_requires=['pygame'],
+      install_requires=['pygame==2.0.0.dev10'],
       # TODO: List executable scripts, provided by the package (this is just an example)
       entry_points={
         'console_scripts': 

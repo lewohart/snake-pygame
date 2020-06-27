@@ -1,18 +1,40 @@
 #!/usr/bin/env python
 
 import argparse
-import pygame
 import logging
+import sys
+
+import pygame
+import time
+
+from snakepygame import common
+
+from color import Color
+from board import Board
+from apple import Apple
+from snake import Snake
 
 logger = logging.getLogger("snake-pygame")
+
+
+def _parse_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Increase verbosity"
+    )
+    parser.add_argument(
+        "-g", "--draw-grid", action="store_true", help="Draw background grid"
+    )
+    cfg = parser.parse_args()
+
+    return cfg
 
 
 def main():
     cfg = _parse_args()
     common.setup_logging(cfg.verbose)
-
     game_quit = False
-    last_key = pygame.K_DOWN
 
     pygame.init()
     pygame.display.set_caption("Snake - by lewohart")
@@ -20,36 +42,25 @@ def main():
 
     display = pygame.Rect(0, 0, 800, 600)
     box = display.inflate(-200, -100)
-    rows = display.width / 10
-    columns = display.height / 10
+    columns = int(box.width / 10)
+    rows = int(box.height / 10)
 
     screen = pygame.display.set_mode(display.size)
-    board = Board(screen, display, box, rows, columns)
+    board = Board(screen, display, box, rows, columns, cfg.draw_grid)
     snake = Snake(board)
     apple = Apple(board)
 
-    def on_quit(e):
-        global game_quit
-        game_quit = True
-
-    def on_key_down(e):
-        global last_key
-        if e.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]:
-            last_key = e.key
-        else:
-            last_key = -1
-
-    while not (game_quit or snake.reachs_the_border or snake.bit_herself):
+    while not (game_quit):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                on_quit(event)
+                game_quit = True
             elif event.type == pygame.KEYDOWN:
-                on_key_down(event)
+                snake.turn(event.key)
 
-        screen.fill(Color.white)
+        snake.move()
 
-        if last_key != -1:
-            snake.move(last_key)
+        if snake.reachs_the_border or snake.bit_herself:
+            break
 
         if snake.reachs_the(apple):
             snake.eat_the(apple)
@@ -65,21 +76,13 @@ def main():
 
     font_style = pygame.font.SysFont(None, 50)
     text = font_style.render("Game over", True, Color.red)
-    screen.blit(text, [display_size[0] / 2, display_size[1] / 2])
+    screen.blit(text, screen)
 
-    pygame.display.update()
-    time.sleep(2)
+    pygame.display.flip()
+    time.sleep(4)
     pygame.quit()
     quit(0)
 
 
-def _parse_args():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Increase verbosity"
-    )
-
-    cfg = parser.parse_args()
-
-    return cfg
+if __name__ == "__main__":
+    sys.exit(main())
