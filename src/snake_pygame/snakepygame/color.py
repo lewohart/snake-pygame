@@ -1,7 +1,10 @@
-class Color(object):
-    black = (0, 0, 0)
-    blue = (0, 0, 255)
-    green = (0, 255, 0)
-    red = (255, 0, 0)
-    white = (255, 255, 255)
-    white_smoke = (245, 245, 245)
+from enum import Enum
+
+
+class Color():
+    BLACK = (0, 0, 0)
+    BLUE = (0, 0, 255)
+    GREEN = (0, 255, 0)
+    RED = (255, 0, 0)
+    WHITE = (255, 255, 255)
+    WHITE_SMOKE = (245, 245, 245)

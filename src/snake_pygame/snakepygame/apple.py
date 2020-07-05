@@ -1,6 +1,6 @@
 import logging
+
 import pygame
-import random
 
 logger = logging.getLogger(__name__)
 
@@ -12,18 +12,21 @@ class Apple(object):
         self.board = board
         self.x = 0
         self.y = 0
-        self.freshen()
+        self.draw = self.draw_core if board.cfg.core_mode else self.draw_sprite
 
-    def freshen(self):
-        self.x = round(random.randrange(self.board.columns))
-        self.y = round(random.randrange(self.board.rows))
-
+    def yield_away_from_the(self, snake):
+        available_cell = self.board.get_available_cell(snake)
+        self.x = available_cell[0]
+        self.y = available_cell[1]
         logger.debug(f"Freshen a new apple at ({self.x}, {self.y})")
 
-    def draw(self):
+    def draw_core(self):
         pygame.draw.circle(
             self.board.screen,
-            Color.red,
+            Color.RED,
             self.board.get_point_at(self.x, self.y),
-            self.board.cel_width * 0.6,
+            self.board.cell_width,
         )
+
+    def draw_sprite(self):
+        self.board.screen.blit(self.board.tile.get_apple(), self.board.get_rect_at(self.x, self.y))
