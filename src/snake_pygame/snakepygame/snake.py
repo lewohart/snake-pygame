@@ -17,21 +17,19 @@ class Snake(object):
         self.grow = False
         self.reachs_the_border = False
         self.bit_herself = False
-        self.looking_to = pygame.K_UP
+        self.looking_direction = pygame.K_UP
+        self.new_direction = None
+        self.bend_direction = None
         self.board = board
 
-        center = (board.rows // 2, board.columns // 2)
+        center = (board.columns // 2, board.rows // 2)
 
-        self.board.tile.set_direction(self.looking_to)
-        self.body = [(center[0], center[1] - i, self.board.tile.get_body()) for i in range(4)]
+        self.body = [
+            (center[0], center[1] - i, self.looking_direction, None) for i in range(10)
+        ]
         self.draw = self.draw_core if board.cfg.core_mode else self.draw_sprite
 
-        self.bend_to = None
-        self.bend_right = board.tile.snake_bend_right
-        self.bend_left = board.tile.snake_bend_left
-
         logger.debug(f"Initial snake {self.body}")
-
 
     def head_x(self) -> (int, int):
         return self.body[-1][0]
@@ -39,28 +37,20 @@ class Snake(object):
     def head_y(self) -> (int, int):
         return self.body[-1][1]
 
-    def move(self,pos: (int, int)):
-        x, y = self.body[-1][0], self.body[-1][1]
-
-        if self.bend_to == self.bend_right:
-            neck = (x, y, self.board.tile.get_bend_right())
-        elif self.bend_to == self.bend_left:
-            neck = (x, y, self.board.tile.get_bend_left())
-        else:
-            neck = (x, y, self.board.tile.get_body())
-
-        self.body[-1] = neck
-        self.bend_to = None
-
+    def move(self, pos: (int, int)):
         if not self.grow:
             del self.body[0]
-            x, y = self.body[0][0], self.body[0][1]
-            self.body[0] = (x, y, self.board.tile.get_tail())
         else:
             self.grow = False
 
-        self.board.tile.set_direction(self.looking_to)
-        self.body.append((pos[0], pos[1], self.board.tile.get_head()))
+        self.body.append((pos[0], pos[1], self.looking_direction, None))
+
+        if self.bend_direction is not None:
+            neck = self.body[-1]
+            self.body[-1] = (neck[0], neck[1], neck[2], self.bend_direction)
+
+            self.looking_direction = self.new_direction
+            self.bend_direction = None
 
     def move_pos(self, pos: (int, int)):
         if self.reachs_the_border:
@@ -99,56 +89,46 @@ class Snake(object):
         logger.critical("Invalid direction")
         return "Unknown"
 
+    def handle_direction(self, direction, forbidden, right):
+        if direction != forbidden:
+            if direction == right:
+                self.bend_direction = self.board.tile.snake_bend_right
+            else:
+                self.bend_direction = self.board.tile.snake_bend_left
+
+            self.new_direction = direction
+
+            logger.debug(
+                f"The snake turns at ({self.head_x()}, {self.head_y()}) to the %s",
+                Snake._direction_name(direction),
+            )
+
     def turn(self, direction):
-        if direction not in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]:
+        if self.looking_direction == direction or direction not in [
+            pygame.K_LEFT,
+            pygame.K_RIGHT,
+            pygame.K_UP,
+            pygame.K_DOWN,
+        ]:
             return
 
-        if self.looking_to == direction:
-            return
-
-        if self.looking_to == pygame.K_LEFT:
-            if direction == pygame.K_RIGHT:
-                return
-
-            self.bend_to = self.bend_right if direction == pygame.K_UP else self.bend_left
-
-        elif self.looking_to == pygame.K_RIGHT:
-            if direction == pygame.K_LEFT:
-                return
-
-            self.bend_to = self.bend_right if direction == pygame.K_DOWN else self.bend_left
-
-        elif self.looking_to == pygame.K_UP:
-            if direction == pygame.K_DOWN:
-                return
-
-            self.bend_to = self.bend_right if direction == pygame.K_RIGHT else self.bend_left
-
-        elif self.looking_to == pygame.K_DOWN:
-            if direction == pygame.K_UP:
-                return
-
-            self.bend_to = self.bend_right if direction == pygame.K_LEFT else self.bend_left
-
-        else:
-            logger.warning(f"The snake tried to turn to an invalid directions ({direction})")
-            return
-
-        logger.debug(
-            f"The snake turns at ({self.head_x()}, {self.head_y()}) to the %s",
-            Snake._direction_name(direction),
-        )
-
-        self.looking_to = direction
+        if self.looking_direction == pygame.K_LEFT:
+            self.handle_direction(direction, pygame.K_RIGHT, pygame.K_UP)
+        elif self.looking_direction == pygame.K_RIGHT:
+            self.handle_direction(direction, pygame.K_LEFT, pygame.K_DOWN)
+        elif self.looking_direction == pygame.K_UP:
+            self.handle_direction(direction, pygame.K_DOWN, pygame.K_RIGHT)
+        elif self.looking_direction == pygame.K_DOWN:
+            self.handle_direction(direction, pygame.K_UP, pygame.K_LEFT)
 
     def step(self):
-        if self.looking_to == pygame.K_LEFT:
+        if self.looking_direction == pygame.K_LEFT:
             self.move_x(-1)
-        elif self.looking_to == pygame.K_RIGHT:
+        elif self.looking_direction == pygame.K_RIGHT:
             self.move_x(1)
-        elif self.looking_to == pygame.K_UP:
+        elif self.looking_direction == pygame.K_UP:
             self.move_y(-1)
-        elif self.looking_to == pygame.K_DOWN:
+        elif self.looking_direction == pygame.K_DOWN:
             self.move_y(1)
         else:
             logger.critical("Invalid direction")
@@ -164,7 +144,19 @@ class Snake(object):
         return self.head_x() == apple.x and self.head_y() == apple.y
 
     def collides(self, pos: (int, int)):
-        return pos in self.body
+        for b in self.body:
+            if b[0] == pos[0] and b[1] == pos[1]:
+                return True
+
+        return False
+
+    def get_body_tile(self, direction, bend_direction):
+        if bend_direction == self.board.tile.snake_bend_right:
+            return self.board.tile.get_bend_right(direction)
+        elif bend_direction == self.board.tile.snake_bend_left:
+            return self.board.tile.get_bend_left(direction)
+        else:
+            return self.board.tile.get_body(direction)
 
     def draw_core(self):
         for b in self.body:
@@ -173,6 +165,15 @@ class Snake(object):
             )
 
     def draw_sprite(self):
-        for b in self.body:
-            x, y, tile = b[0], b[1], b[2]
+        x, y, direction, bend = self.body[-1]
+        head = self.board.tile.get_head(direction)
+        self.board.screen.blit(head, self.board.get_rect_at(x, y))
+
+        for x, y, direction, bend in self.body[1:-1]:
+            tile = self.get_body_tile(direction, bend)
             self.board.screen.blit(tile, self.board.get_rect_at(x, y))
+
+        x, y, _, _ = self.body[0]
+        direction = self.body[1][2]
+        tile = self.board.tile.get_tail(direction)
+        self.board.screen.blit(tile, self.board.get_rect_at(x, y))

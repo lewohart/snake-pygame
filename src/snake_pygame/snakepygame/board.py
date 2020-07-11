@@ -28,7 +28,9 @@ class Board(object):
         self.cell_width = round(box.width / (columns + 1))
         self.cell_height = round(box.height / (rows + 1))
 
-        self.tile = Tile(self.cell_width, self.cell_height) if not cfg.core_mode else None
+        self.tile = (
+            Tile(self.cell_width, self.cell_height) if not cfg.core_mode else None
+        )
         self.on_draw_grid = self.on_draw_grid_active if cfg.draw_grid else lambda: None
 
     def get_rect_at(self, x: int, y: int) -> pygame.Rect:

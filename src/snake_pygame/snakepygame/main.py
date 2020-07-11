@@ -78,7 +78,7 @@ def main():
 
         pygame.display.flip()
 
-        clock.tick(5)
+        clock.tick(20)
 
     font_style = pygame.font.SysFont(pygame.font.get_default_font(), 50)
     text = font_style.render("Game over", True, Color.RED)
@@ -97,15 +97,14 @@ def show_tile():
     screen = pygame.display.set_mode((320, 256))
     screen.fill((255, 255, 255))
     tile = Tile(32, 32)
-    tile.set_direction(pygame.K_DOWN)
+    direction = pygame.K_DOWN
 
-    screen.blit(tile.get_tail(), (0, 0))
-    screen.blit(tile.get_body(), (0, 32))
-    screen.blit(tile.get_head(), (0, 64))
+    screen.blit(tile.get_tail(direction), (0, 0))
+    screen.blit(tile.get_body(direction), (0, 32))
+    screen.blit(tile.get_head(direction), (0, 64))
 
-    screen.blit(tile.get_bend_left(), (32, 0))
-    screen.blit(tile.get_bend_right(), (64, 0))
-
+    screen.blit(tile.get_bend_left(direction), (32, 0))
+    screen.blit(tile.get_bend_right(direction), (64, 0))
 
     pygame.display.flip()
     while pygame.event.wait().type != pygame.QUIT:

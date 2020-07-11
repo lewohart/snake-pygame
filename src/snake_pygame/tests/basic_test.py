@@ -1,4 +1,4 @@
-'''
+"""
 snake-pygame: Test module.
 
 Meant for use with py.test.
@@ -7,7 +7,8 @@ Read more here: http://pytest.org/
 
 Copyright 2020, Leonardo Gomes-Francisco
 Licensed under MIT
-'''
+"""
+
 
 def test_example():
     assert True

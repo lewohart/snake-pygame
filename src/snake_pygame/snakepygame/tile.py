@@ -20,14 +20,13 @@ class Tile(object):
 
         self.tile_table = self.__build_index()
 
-        '''                  Head    Body    Left    Right   Tail'''
-        self.snake_left =  ((3, 1), (1, 0), (0, 0), (0, 1), (3, 3))
+        """                 Head    Body    Left    Right   Tail   """
+        self.snake_left = ((3, 1), (1, 0), (0, 0), (0, 1), (3, 3))
         self.snake_right = ((4, 0), (1, 0), (2, 2), (2, 0), (4, 2))
-        self.snake_up =    ((3, 0), (2, 1), (2, 0), (0, 0), (3, 2))
-        self.snake_down =  ((4, 1), (2, 1), (0, 1), (2, 2), (4, 3))
+        self.snake_up = ((3, 0), (2, 1), (2, 0), (0, 0), (3, 2))
+        self.snake_down = ((4, 1), (2, 1), (0, 1), (2, 2), (4, 3))
 
         self.apple_pos = (0, 3)
-        self.snake_parts = self.snake_up
 
     def __build_index(self):
         image_width, image_height = self.image.get_size()
@@ -53,37 +52,38 @@ class Tile(object):
 
         return tile_table
 
-    def set_direction(self, direction):
+    def get_direction(self, direction):
         if direction == pygame.K_LEFT:
-            self.snake_parts = self.snake_left
+            return self.snake_left
         elif direction == pygame.K_RIGHT:
-            self.snake_parts = self.snake_right
+            return self.snake_right
         elif direction == pygame.K_UP:
-            self.snake_parts = self.snake_up
+            return self.snake_up
         elif direction == pygame.K_DOWN:
-            self.snake_parts = self.snake_down
+            return self.snake_down
         else:
             raise RuntimeError("Invalid direction")
 
-    def get_tile_for(self, part):
-        body_part = self.snake_parts[part]
+    def get_tile_for(self, part, direction):
+        snake_parts = self.get_direction(direction)
+        body_part = snake_parts[part]
         col, row = body_part[0], body_part[1]
         return self.tile_table[col][row]
 
-    def get_head(self) -> pygame.Surface:
-        return self.get_tile_for(Tile.snake_head)
+    def get_head(self, direction) -> pygame.Surface:
+        return self.get_tile_for(Tile.snake_head, direction)
 
-    def get_body(self) -> pygame.Surface:
-        return self.get_tile_for(Tile.snake_body)
+    def get_body(self, direction) -> pygame.Surface:
+        return self.get_tile_for(Tile.snake_body, direction)
 
-    def get_bend_left(self) -> pygame.Surface:
-        return self.get_tile_for(Tile.snake_bend_left)
+    def get_bend_left(self, direction) -> pygame.Surface:
+        return self.get_tile_for(Tile.snake_bend_left, direction)
 
-    def get_bend_right(self) -> pygame.Surface:
-        return self.get_tile_for(Tile.snake_bend_right)
+    def get_bend_right(self, direction) -> pygame.Surface:
+        return self.get_tile_for(Tile.snake_bend_right, direction)
 
-    def get_tail(self) -> pygame.Surface:
-        return self.get_tile_for(Tile.snake_tail)
+    def get_tail(self, direction) -> pygame.Surface:
+        return self.get_tile_for(Tile.snake_tail, direction)
 
     def get_apple(self) -> pygame.Surface:
         col = self.apple_pos[0]

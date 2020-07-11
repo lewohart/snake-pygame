@@ -1,4 +1,4 @@
-'''
+"""
 snake-pygame: Snake game for Python study
 
 Note that "python setup.py test" invokes pytest on the package. With appropriately
@@ -6,7 +6,7 @@ configured setup.cfg, this will check both xxx_test modules and docstrings.
 
 Copyright 2020, Leonardo Gomes-Francisco.
 Licensed under MIT.
-'''
+"""
 import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
@@ -21,35 +21,33 @@ class PyTest(TestCommand):
 
     def run_tests(self):
         import pytest  # import here, because outside the required eggs aren't loaded yet
+
         sys.exit(pytest.main(self.test_args))
 
 
 version = "0.1"
 
-setup(name="snake-pygame",
-      version=version,
-      description="Snake game for Python study",
-      long_description=open("README.rst").read(),
-      classifiers=[ # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 1 - Planning',
-        'Programming Language :: Python'
-      ],
-      keywords="python pygame", # Separate with spaces
-      author="Leonardo Gomes-Francisco",
-      author_email="leonardo.francisco@gmail.com",
-      url="https://github.com/lewohart/snake-pygame",
-      license="MIT",
-      packages=find_packages(exclude=['examples', 'tests']),
-      include_package_data=True,
-      zip_safe=True,
-      tests_require=['pytest'],
-      cmdclass={'test': PyTest},
-      
-      # TODO: List of packages that this one depends upon:   
-      install_requires=['pygame==2.0.0.dev10'],
-      # TODO: List executable scripts, provided by the package (this is just an example)
-      entry_points={
-        'console_scripts': 
-            ['snake_pygame=snakepygame:main']
-      }
+setup(
+    name="snake-pygame",
+    version=version,
+    description="Snake game for Python study",
+    long_description=open("README.rst").read(),
+    classifiers=[  # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+        "Development Status :: 1 - Planning",
+        "Programming Language :: Python",
+    ],
+    keywords="python pygame",  # Separate with spaces
+    author="Leonardo Gomes-Francisco",
+    author_email="leonardo.francisco@gmail.com",
+    url="https://github.com/lewohart/snake-pygame",
+    license="MIT",
+    packages=find_packages(exclude=["examples", "tests"]),
+    include_package_data=True,
+    zip_safe=True,
+    tests_require=["pytest"],
+    cmdclass={"test": PyTest},
+    # TODO: List of packages that this one depends upon:
+    install_requires=["pygame==2.0.0.dev10"],
+    # TODO: List executable scripts, provided by the package (this is just an example)
+    entry_points={"console_scripts": ["snake_pygame=snakepygame:main"]},
 )

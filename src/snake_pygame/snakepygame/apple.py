@@ -29,4 +29,6 @@ class Apple(object):
         )
 
     def draw_sprite(self):
-        self.board.screen.blit(self.board.tile.get_apple(), self.board.get_rect_at(self.x, self.y))
+        self.board.screen.blit(
+            self.board.tile.get_apple(), self.board.get_rect_at(self.x, self.y)
+        )
